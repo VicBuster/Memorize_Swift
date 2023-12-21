@@ -5,7 +5,7 @@
 //  Created by Vic Z.Ding on 2023/2/22.
 //
 
-// Model
+/// Model
 import Foundation
 
 // Equatable: can use "=="
@@ -24,13 +24,29 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         }
     }
     
+    // Marked mutating to modify state
     mutating func choose(_ card: Card) {
         
-        // !: exclamation point, assume it is .some case, or it will crash
-        // let chosenindex: Int = self.index(of: card)!
+        /// nil is Optional.none
+        /// !: exclamation point, assume it is .some(Optional.some) case, or it will crash
+        /// let hello: String? = ...
+        /// print(hello!) --> switch hello {
+        ///                       case .none: // raise an exception(crash)
+        ///                       case .some(let data): print(data)
+        ///                   }
+        /// if let safeHello = hello {   -->    switch hello{
+        ///     print(safeHello)                    case .none: { // do something else }
+        /// else {                                  case .some(let data): print(data)
+        ///     // do something else            }
+        /// }
+        
+        
+        // let chosenIndex: Int = self.index(of: card)!
         // if let chosenIndex: Int = self.index(of: card) {
         
-        if let chosenIndex: Int = cards.firstIndex(where: {$0.id == card.id}), !cards[chosenIndex].isFaceUp, !cards[chosenIndex].isMatched {
+        if let chosenIndex: Int = cards.firstIndex(where: {$0.id == card.id}), 
+            !cards[chosenIndex].isFaceUp,
+            !cards[chosenIndex].isMatched {
             if let potentialMatchIndex = indexOfTheOneAndOnlyFaceUpCard {
                 if cards[chosenIndex].content == cards[potentialMatchIndex].content {
                     cards[chosenIndex].isMatched = true
@@ -43,7 +59,8 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         }
     }
     
-    // external name and internal name
+    // external name 'of' and internal name 'card'
+    // .firstIndex(where ...) does the same job
     func index(of card: Card) -> Int? {
         
         for index in 0..<self.cards.count {
@@ -54,6 +71,7 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         return nil
     }
     
+    // createCardContent: a closure
     init(numberOfPairsOfCards: Int, createCardContent: (Int) -> CardContent) {
         cards = []
         

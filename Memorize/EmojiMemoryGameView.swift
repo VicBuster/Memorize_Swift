@@ -13,9 +13,9 @@ struct EmojiMemoryGameView: View {
     
     @ObservedObject var game: EmojiMemoryGame
     
-    // property: a var inside a struct or a class
-    // every variable has a specific type and a value
-    // Text is also a struct tha behaves like a View
+    /// property: a var inside a struct or a class
+    /// every variable has a specific type and a value
+    /// Text is also a struct that behaves like a View
     var body: some View {
         
         ScrollView {
