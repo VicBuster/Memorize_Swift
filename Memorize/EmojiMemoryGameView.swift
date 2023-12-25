@@ -22,7 +22,7 @@ struct EmojiMemoryGameView: View {
             LazyVGrid (columns: [GridItem(.adaptive(minimum: 70))]) {
                 ForEach(game.cards) { card in
                     // combiner View
-                    CardView(card)
+                    CardView(card:card)
                         .aspectRatio(2 / 3, contentMode: .fit)
                         .onTapGesture {
                             self.game.choose(card)
@@ -37,11 +37,11 @@ struct EmojiMemoryGameView: View {
 
 struct CardView: View {
     
-    private let card: EmojiMemoryGame.Card
+    let card: EmojiMemoryGame.Card
     
-    init(_ card: EmojiMemoryGame.Card) {
-        self.card = card
-    }
+//    init(_ card: EmojiMemoryGame.Card) {
+//        self.card = card
+//    }
     
     var body: some View {
         GeometryReader(content: { geometry in
@@ -74,8 +74,7 @@ struct CardView: View {
 
 
 
-
-struct ContentView_Previews: PreviewProvider {
+struct EmojiMemoryGameView_Previews: PreviewProvider {
     static var previews: some View {
         EmojiMemoryGameView(game: EmojiMemoryGame())
             .preferredColorScheme(.light)
