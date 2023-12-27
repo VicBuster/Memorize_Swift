@@ -111,7 +111,7 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         }
     }
     
-    struct Card: Identifiable {
+    struct Card: Identifiable, Equatable {
         
         var isFaceUp = false
         var isMatched = false
@@ -120,6 +120,13 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         
         // ObjectIdentifiable
         let id: Int
+        
+        static func == (lhs: MemoryGame.Card, rhs: MemoryGame.Card) -> Bool {
+            return lhs.isFaceUp == rhs.isFaceUp &&
+            lhs.isMatched == rhs.isMatched &&
+            lhs.content == rhs.content &&
+            lhs.id == rhs.id
+        }
     }
 }
 
