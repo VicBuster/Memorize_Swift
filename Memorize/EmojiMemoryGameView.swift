@@ -13,6 +13,8 @@ struct EmojiMemoryGameView: View {
     
     @ObservedObject var game: EmojiMemoryGame
     
+    @Namespace private var dealingNamespace
+    
     /// property: a var inside a struct or a class
     /// every variable has a specific type and a value
     /// Text is also a struct that behaves like a View
@@ -35,7 +37,13 @@ struct EmojiMemoryGameView: View {
         
         VStack {
             gameBody
-            shuffle
+            deckBody
+            HStack {
+                restart
+                Spacer()
+                shuffle
+            }
+            .padding(.horizontal)
         }
         .padding()
     }
@@ -50,6 +58,10 @@ struct EmojiMemoryGameView: View {
         !dealt.contains(card.id)
     }
     
+    private func zIndex(of card: EmojiMemoryGame.Card) -> Double {
+        -Double(game.cards.firstIndex(where: { $0.id == card.id }) ?? 0)
+    }
+    
     var gameBody: some View {
         AspectVGrid(items: game.cards, aspectRatio: 2 / 3) { card in
             if isUndealt(card) || (card.isMatched && !card.isFaceUp) {
@@ -57,23 +69,52 @@ struct EmojiMemoryGameView: View {
                 Color.clear
             } else {
                 CardView(card:card)
+                    .matchedGeometryEffect(id: card.id, in: dealingNamespace)
                     .padding(4)
-                    .transition(AnyTransition.asymmetric(insertion: .scale, removal: .opacity).animation(.easeInOut(duration: 1)))
+                    .transition(AnyTransition.asymmetric(insertion: .identity, removal: .scale))
+                    .zIndex(zIndex(of: card))
                     .onTapGesture {
                         withAnimation(.easeInOut(duration: 0.5)) {
-                            self.game.choose(card)
+                            game.choose(card)
                         }
                     }
             }
         }
-        .onAppear {
-            withAnimation {
-                for card in game.cards {
+        .foregroundColor(CardConstants.color)
+    }
+    
+    // each card is dealt with delay which is related to index
+    private func dealAnimation(for card: EmojiMemoryGame.Card) -> Animation {
+        var delay = 0.0
+        if let index = game.cards.firstIndex(where: {$0.id == card.id}) {
+            delay = Double(index) * (CardConstants.totalDealDuration / Double(game.cards.count))
+        }
+        return Animation.easeInOut(duration: CardConstants.dealDuration).delay(delay)
+    }
+    
+    var deckBody: some View {
+        ZStack {
+            ForEach(game.cards.filter(isUndealt)) { card in
+                CardView(card: card)
+                    .matchedGeometryEffect(id: card.id, in: dealingNamespace)
+                    .transition(AnyTransition.asymmetric(insertion: .opacity, removal: .identity))
+                    .zIndex(zIndex(of: card))
+            }
+        }
+        .frame(width: CardConstants.undealWidth, height: CardConstants.undealHeight)
+        .foregroundColor(CardConstants.color)
+        .onTapGesture {
+//            withAnimation(.easeInOut(duration: 3)) {
+//                for card in game.cards {
+//                    deal(card)
+//                }
+//            }
+            for card in game.cards {
+                withAnimation(dealAnimation(for: card)) {
                     deal(card)
                 }
             }
         }
-        .foregroundColor(.red)
     }
     
     var shuffle: some View {
@@ -82,6 +123,24 @@ struct EmojiMemoryGameView: View {
                 game.shuffle()
             }
         }
+    }
+    
+    var restart: some View {
+        Button("Restart") {
+            withAnimation {
+                dealt = []
+                game.restart()
+            }
+        }
+    }
+    
+    private struct CardConstants {
+        static let color = Color.red
+        static let aspectRatio: CGFloat = 2 / 3
+        static let dealDuration: Double = 0.5
+        static let totalDealDuration: Double = 2
+        static let undealHeight: CGFloat = 90
+        static let undealWidth = undealHeight * aspectRatio
     }
 }
 
@@ -103,7 +162,8 @@ struct CardView: View {
                 Text(card.content)
                     .rotationEffect(Angle.degrees(card.isMatched ? 360 : 0))
                     // when card.isMatched changes, it animates.
-                    .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false))
+//                    .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false))
+                    .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false), value: card.isMatched)
                     // font is not animatable, so put in a static size and use animatable scaleEffect
                     .font(Font.system(size: DrawingConstants.fontSize))
                     .scaleEffect(scale(thatFits: geometry.size))
