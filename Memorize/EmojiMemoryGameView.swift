@@ -34,16 +34,17 @@ struct EmojiMemoryGameView: View {
 //        }
 //        .foregroundColor(.red)
 //        .padding(.horizontal)
-        
-        VStack {
-            gameBody
-            deckBody
-            HStack {
-                restart
-                Spacer()
-                shuffle
+        ZStack(alignment: .bottom) {
+            VStack {
+                gameBody
+                HStack {
+                    restart
+                    Spacer()
+                    shuffle
+                }
+                .padding(.horizontal)
             }
-            .padding(.horizontal)
+            deckBody
         }
         .padding()
     }
@@ -152,13 +153,31 @@ struct CardView: View {
 //        self.card = card
 //    }
     
+    @State private var animatedBonusRemaining: Double = 0
+    
     var body: some View {
         GeometryReader(content: { geometry in
             ZStack {
-                
-                // 0 degree is to the right, so minus 90 should be up
-                Pie(startAngle: Angle(degrees: 0 - 90), endAngle: Angle(degrees: 120 - 90))
-                    .padding(5).opacity(0.4)
+                Group {
+                    if (card.isConsumingBonusTime) {
+                        // 0 degree is to the right, so minus 90 should be up
+                        Pie(startAngle: Angle(degrees: 0 - 90), endAngle: Angle(degrees: (1 - animatedBonusRemaining) * 360 - 90))
+                            .onAppear {
+                                animatedBonusRemaining = card.bonusRemaining
+                                withAnimation(.linear(duration: card.bonusTimeRemaining)) {
+                                    animatedBonusRemaining = 0
+                                }
+                            }
+                    } else {
+                        // 0 degree is to the right, so minus 90 should be up
+                        Pie(startAngle: Angle(degrees: 0 - 90), endAngle: Angle(degrees: (1 - card.bonusRemaining) * 360 - 90))
+                    }
+                }
+                    .padding(5)
+                    .opacity(0.4)
+//                // 0 degree is to the right, so minus 90 should be up
+//                Pie(startAngle: Angle(degrees: 0 - 90), endAngle: Angle(degrees: (1 - card.bonusRemaining) * 360 - 90))
+//                    .padding(5).opacity(0.4)
                 Text(card.content)
                     .rotationEffect(Angle.degrees(card.isMatched ? 360 : 0))
                     // when card.isMatched changes, it animates.
