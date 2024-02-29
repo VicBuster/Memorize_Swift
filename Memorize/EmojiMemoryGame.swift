@@ -8,20 +8,25 @@
 // ViewModel
 import SwiftUI
 
-class EmojiMemoryGame: ObservableObject {
+// Migrating from the Observable Object protocol to the Observable macro
+@Observable class EmojiMemoryGame {
     
     typealias Card = MemoryGame<String>.Card
+    
     private static let emojis = ["🚂", "🚀", "🚁", "🚜", "🚕", "🏎️", "🚑", "🚓", "🚒", "✈️", "🚲", "🛸", "⛵️", "🛶", "🚚", "🛵", "🏍️", "🛺", "🚢", "🛰️"]
     
     // send notification if model changes | objectWillChange.send
-    @Published private var model = createMemoryGame()
+    private var model = createMemoryGame()
     
     static func createMemoryGame() -> MemoryGame<String> {
                 
         return MemoryGame<String>(numberOfPairsOfCards: 10) { pairIndex in
-            return emojis[pairIndex]
+            if emojis.indices.contains(pairIndex) {
+                return emojis[pairIndex]
+            } else {
+                return "⁉️"
+            }
         }
-        
     }
         
     // MARK: - Access to the Model
@@ -38,9 +43,5 @@ class EmojiMemoryGame: ObservableObject {
     
     func shuffle() {
         model.shuffle()
-    }
-    
-    func restart() {
-        model = EmojiMemoryGame.createMemoryGame()
     }
 }

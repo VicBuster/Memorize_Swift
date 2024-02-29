@@ -108,7 +108,7 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         
         cards = []
         
-        for pairIndex in 0..<numberOfPairsOfCards {
+        for pairIndex in 0..<max(2, numberOfPairsOfCards) {
             
             let content = createCardContent(pairIndex)
             cards.append(Card(content: content, id: pairIndex * 2))
@@ -141,12 +141,12 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         // ObjectIdentifiable
         let id: Int
         
-        static func == (lhs: MemoryGame.Card, rhs: MemoryGame.Card) -> Bool {
-            return lhs.isFaceUp == rhs.isFaceUp &&
-            lhs.isMatched == rhs.isMatched &&
-            lhs.content == rhs.content &&
-            lhs.id == rhs.id
-        }
+//        static func == (lhs: Card, rhs: Card) -> Bool {
+//            return lhs.isFaceUp == rhs.isFaceUp &&
+//            lhs.isMatched == rhs.isMatched &&
+//            lhs.content == rhs.content &&
+//            lhs.id == rhs.id
+//        }
         
         
         // MARK: - Bonus Time
